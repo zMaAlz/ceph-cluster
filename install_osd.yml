@@ -1,0 +1,28 @@
+---
+- name: Preparation Ceph cluster
+  hosts: cephmonitor
+  pre_tasks:
+    - name: Save the contents of /etc/os-release
+      command: cat /etc/os-release
+      register: os_release
+      changed_when: False
+    - name: Detect Linux Servers
+      debug:
+        msg: "Find on CentOS|Fedora..."
+      when: os_release.stdout.find('CentOS') != -1 or os_release.stdout.find('Fedora') != -1
+      changed_when: False
+    - name: Detect Linux Servers
+      debug:
+        msg: "Find on Debian|Ubuntu..."
+      when: os_release.stdout.find('debian') != -1 or os_release.stdout.find('Ubuntu') != -1
+      changed_when: False
+  tasks:
+    - name: Deploy OSDs
+      become: true
+      ansible.builtin.shell: ceph orch apply osd --all-available-devices
+      when: {{ ALL_AVALABLE_DEVICE }} == "true"
+    - name: Deploy OSDs
+      become: true
+      ansible.builtin.shell: ceph orch daemon add osd {{ item }}:{{ OSD_DISK }}
+      when: {{ ALL_AVALABLE_DEVICE }} == "false"
+      loop: {{ OSD_SERVER }}

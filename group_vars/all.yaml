@@ -1,0 +1,11 @@
+---
+### First MON
+FIRST_HOST_MONITOR: "192.168.2.32"
+CLUSTER-NETWORKS: "192.168.10.0/24"
+UNMANAGED_CEPH_MON: "false" # true - отключает авторазвертывание mon, false - разрешает
+### OSD
+ALL_AVALABLE_DEVICE: "false" # Если true - задействует все свободные диски. Если false - необходимо указать адрес сервера и имя диска (OSD_SERVER и OSD_DISK)
+OSD_SERVER: "192.168.2.50,192.168.2.51,192.168.2.52"
+OSD_DISK: "/dev/sdb,/dev/sdc"
+### Add new server
+NEW_NODE:  "192.168.2.50,192.168.2.51,192.168.2.52"

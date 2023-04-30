@@ -1,0 +1,34 @@
+---
+- name: Preparation Ceph cluster
+  hosts: cephmonitor
+  pre_tasks:
+    - name: Save the contents of /etc/os-release
+      command: cat /etc/os-release
+      register: os_release
+      changed_when: False
+    - name: Detect Linux Servers
+      debug:
+        msg: "Find on CentOS|Fedora..."
+      when: os_release.stdout.find('CentOS') != -1 or os_release.stdout.find('Fedora') != -1
+      changed_when: False
+    - name: Detect Linux Servers
+      debug:
+        msg: "Find on Debian|Ubuntu..."
+      when: os_release.stdout.find('debian') != -1 or os_release.stdout.find('Ubuntu') != -1
+      changed_when: False
+  tasks:
+    - name: Install cephadm
+      become: true
+      ansible.builtin.package:
+        name: cephadm
+        state: present
+    - name: Install ceph-common
+      become: true
+      ansible.builtin.shell:  cephadm add-repo --release quincy && cephadm install ceph-common
+    - name: Bootstrap new cluster
+      become: true
+      ansible.builtin.shell: cephadm bootstrap --mon-ip {{ FIRST_HOST_MONITOR }} --cluster-network {{ CLUSTER-NETWORKS }}
+    - name: Disable auto install mon
+      become: true
+      ansible.builtin.shell: ceph orch apply mon --unmanaged
+      when: {{ UNMANAGED_CEPH_MON }} == "true"
